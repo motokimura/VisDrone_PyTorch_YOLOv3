@@ -35,7 +35,7 @@ def main():
         cfg = yaml.load(f)
 
     imgsize = cfg['TEST']['IMGSIZE']
-    model = YOLOv3()
+    model = YOLOv3(n_classes=80)
     confthre = cfg['TEST']['CONFTHRE'] 
     nmsthre = cfg['TEST']['NMSTHRE']
 

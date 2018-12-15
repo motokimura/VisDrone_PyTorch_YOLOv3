@@ -19,14 +19,15 @@ class YOLOLayer(nn.Module):
             ignore_thre (float): threshold of IoU above which objectness training is ignored.
         """
         super(YOLOLayer, self).__init__()
+        self.n_anchors = 3
+        out_channels = (n_classes + 5) * self.n_anchors # 5 = len([x, y, w, h, conf])
         self.conv = nn.Conv2d(in_channels=in_ch,
-                              out_channels=255, kernel_size=1, stride=1, padding=0)
+                              out_channels=out_channels, kernel_size=1, stride=1, padding=0)
         self.anchors = [
             (10, 13), (16, 30), (33, 23),
             (30, 61), (62, 45), (59, 119),
             (116, 90), (156, 198), (373, 326)]
         self.anch_mask = anch_mask
-        self.n_anchors = 3
         self.n_classes = n_classes
         self.ignore_thre = ignore_thre
         self.l2_loss = nn.MSELoss(size_average=False)
@@ -178,11 +179,11 @@ class YOLOLayer(nn.Module):
         # loss calculation
 
         output[..., 4] *= obj_mask
-        output[..., np.r_[0:4, 5:85]] *= tgt_mask
+        output[..., np.r_[0:4, 5:(5+self.n_classes)]] *= tgt_mask
         output[..., 2:4] *= tgt_scale
 
         target[..., 4] *= obj_mask
-        target[..., np.r_[0:4, 5:85]] *= tgt_mask
+        target[..., np.r_[0:4, 5:(5+self.n_classes)]] *= tgt_mask
         target[..., 2:4] *= tgt_scale
 
         bceloss = nn.BCELoss(weight=tgt_scale*tgt_scale,
