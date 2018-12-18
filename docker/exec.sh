@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /bin/bash
 
 # Exec
 CONTAINER="yolov3-visdrone"

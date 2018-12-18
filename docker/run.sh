@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /bin/bash
 
 # Set image name
 IMAGE="yolov3-visdrone:latest"
@@ -17,4 +17,4 @@ nvidia-docker run -it --rm \
 	-p 8888:8888 -p 6006:6006 \
 	-v ${PROJ_DIR}:/work \
 	--name ${CONTAINER} \
-	${IMAGE} /bin/bash
+	${IMAGE}
