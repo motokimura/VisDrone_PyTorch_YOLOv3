@@ -10,7 +10,10 @@ This repository provides:
 Install dependencies by following:
 
 ```
-$ pip install -r requirements.txt
+$ cd visdrone_scripts
+$ pip install pipenv
+
+$ pipenv sync
 ```
 
 ## Usage
