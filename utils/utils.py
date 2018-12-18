@@ -268,7 +268,7 @@ def preprocess(img, imgsize):
     return img, info_img
 
 
-# TBI, gen label_names from coco-format json file..
+# [TBM] gen label_names from coco-format json file..
 def get_coco_label_names():
     """
     COCO label names and correspondence between the model's class index and COCO class index.
@@ -303,13 +303,20 @@ def get_coco_label_names():
     return coco_label_names, coco_class_ids, coco_cls_colors
 
 
-# TBI, gen label_names from coco-format json file..
+# [TBM] gen label_names from coco-format json file..
 def get_visdrone_label_names():
-    label_names = ('background','pedestrian', 'people', 'bicycle', 'car', 'van', 'truck', 'tricycle', 'awning-tricycle', 'bus', 'motor')
-    class_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+    #label_names = ('background','pedestrian', 'people', 'bicycle', 'car', 'van', 'truck', 'tricycle', 'awning-tricycle', 'bus', 'motor')
+    #class_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+    label_names = ('background', 'bicycle', 'car', 'van', 'truck', 'tricycle', 'awning-tricycle', 'bus', 'motor')
+    class_ids = [1, 2, 3, 4, 5, 6, 7, 8]
+
+    #label_names = ('background', 'car', 'van', 'truck', 'bus')
+    #class_ids = [1, 2, 3, 4]
 
     cls_colors = np.empty(shape=(0, 3), dtype=np.int)
-    palette = sns.color_palette('bright', len(class_ids))
+    palette = sns.color_palette('dark', len(class_ids))
     for color in palette:
         r, g, b = color[0] * 255, color[1] * 255, color[2] * 255
         rgb = np.array([int(r), int(g), int(b)])

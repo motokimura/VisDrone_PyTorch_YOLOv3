@@ -1,4 +1,5 @@
 import argparse
+import os
 import numpy as np
 import yaml
 import matplotlib.pyplot as plt
@@ -13,29 +14,44 @@ from utils.parse_yolo_weights import parse_yolo_weights
 from utils.vis_bbox import vis_bbox
 
 
-def main():
-    """
-    Visualize the detection result for the given image and the pre-trained model.
-    """
+def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--gpu', type=int, default=0)
-    parser.add_argument('--cfg', type=str, default='config/yolov3_default.cfg')
+    parser.add_argument('--image', '-i', type=str)
+    parser.add_argument('--data', type=str, choices=['coco', 'drone'], default='drone')
+    parser.add_argument('--detect_thresh', type=float,
+                        default=0.5, help='confidence threshold')
     parser.add_argument('--ckpt', type=str,
                         help='path to the checkpoint file')
-    parser.add_argument('--weights_path', type=str,
+    parser.add_argument('--weights_path', '-w', type=str,
                         default=None, help='path to weights file')
-    parser.add_argument('--image', type=str)
-    parser.add_argument('--background', action='store_true',
-                        default=False, help='background(no-display mode. save "./output.png")')
-    parser.add_argument('--detect_thresh', type=float,
-                        default=None, help='confidence threshold')
-    args = parser.parse_args()
+    parser.add_argument('--gpu', type=int, default=0)
+    parser.add_argument('--window', action='store_true',
+                        help='show result on matplotlib window. Otherwise, save as a PNG file')
+    return parser.parse_args()
 
-    with open(args.cfg, 'r') as f:
+
+def main():
+    args = parse_args()
+
+    print("------------------------------------")
+    print("    use {} dataset for demo.        ".format(args.data))
+    print("------------------------------------")
+
+    assert args.data in ['coco', 'drone']
+
+    # [TBM] gen n_classes from coco-format json file..
+    if args.data == 'coco':
+        cfg_path = 'config/yolov3_default.cfg'
+        n_classes = 80
+    if args.data == 'drone':
+        cfg_path = 'config/yolov3_visdrone_default.cfg'
+        n_classes = 4
+
+    with open(cfg_path, 'r') as f:
         cfg = yaml.load(f)
 
     imgsize = cfg['TEST']['IMGSIZE']
-    model = YOLOv3(n_classes=80)
+    model = YOLOv3(n_classes=n_classes)
     confthre = cfg['TEST']['CONFTHRE'] 
     nmsthre = cfg['TEST']['NMSTHRE']
 
@@ -43,6 +59,8 @@ def main():
         confthre = args.detect_thresh
 
     img = cv2.imread(args.image)
+    assert img is not None
+
     img_raw = img.copy()[:, :, ::-1].transpose((2, 0, 1))
     img, info_img = preprocess(img, imgsize)  # info = (h, w, nh, nw, dx, dy)
     img = torch.from_numpy(img).float().unsqueeze(0)
@@ -64,9 +82,13 @@ def main():
 
     with torch.no_grad():
         outputs = model(img)
-        outputs = postprocess(outputs, 80, confthre, nmsthre)
-
-    coco_class_names, coco_class_ids, coco_class_colors = get_coco_label_names()
+        outputs = postprocess(outputs, n_classes, confthre, nmsthre)
+    
+    # [TBM] gen label_names from coco-format json file..
+    if args.data == 'coco':
+        class_names, class_ids, class_colors = get_coco_label_names()
+    if args.data == 'drone':
+        class_names, class_ids, class_colors = get_visdrone_label_names()
 
     bboxes = list()
     classes = list()
@@ -74,22 +96,24 @@ def main():
 
     for x1, y1, x2, y2, conf, cls_conf, cls_pred in outputs[0]:
 
-        cls_id = coco_class_ids[int(cls_pred)]
+        cls_id = class_ids[int(cls_pred)]
         print(int(x1), int(y1), int(x2), int(y2), float(conf), int(cls_pred))
         print('\t+ Label: %s, Conf: %.5f' %
-              (coco_class_names[cls_id], cls_conf.item()))
+              (class_names[cls_id], cls_conf.item()))
         box = yolobox2label([y1, x1, y2, x2], info_img)
         bboxes.append(box)
         classes.append(cls_id)
-        colors.append(coco_class_colors[int(cls_pred)])
-
-    if args.background==False:
-        vis_bbox(
-            img_raw, bboxes, label=classes, label_names=coco_class_names,
-            instance_colors=colors, linewidth=2)
+        colors.append(class_colors[int(cls_pred)])
+    
+    vis_bbox(
+        img_raw, bboxes, label=classes, label_names=class_names,
+        instance_colors=colors, linewidth=2)
+    
+    if args.window:
         plt.show()
     else:
-        plt.savefig('output.png')
+        out_path = './output.png'
+        plt.savefig(out_path, bbox_inches=0, pad_inches=0, dpi=100)
 
 
 if __name__ == '__main__':

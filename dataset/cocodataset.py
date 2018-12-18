@@ -14,7 +14,8 @@ class COCODataset(Dataset):
     COCO dataset class.
     """
     def __init__(self, model_type, data_dir='COCO', json_file='instances_train2017.json',
-                 name='train2017', img_size=416, min_size=1, debug=False):
+                 name='train2017', img_size=416, min_size=1, max_labels=50, use_filename_key=False, 
+                 debug=False):
         """
         COCO dataset initialization. Annotation data are read into memory by COCO API.
         Args:
@@ -29,16 +30,17 @@ class COCODataset(Dataset):
         self.data_dir = data_dir
         self.json_file = json_file
         self.model_type = model_type
-        self.coco = COCO(self.data_dir+'annotations/'+self.json_file)
+        self.coco = COCO(os.path.join(self.data_dir, 'annotations/', self.json_file))
         self.ids = self.coco.getImgIds()
         if debug:
             self.ids = self.ids[1:2]
             print("debug mode...", self.ids)
         self.class_ids = sorted(self.coco.getCatIds())
         self.name = name
-        self.max_labels = 50
+        self.max_labels = max_labels
         self.img_size = img_size
         self.min_size = min_size
+        self.use_filename_key = use_filename_key
 
     def __len__(self):
         return len(self.ids)
@@ -69,8 +71,10 @@ class COCODataset(Dataset):
         annotations = self.coco.loadAnns(anno_ids)
 
         # load image and preprocess
-        img_file = os.path.join(self.data_dir, self.name,
-                                '{:012}'.format(id_) + '.jpg')
+        if self.use_filename_key:
+            img_file = os.path.join(self.data_dir, self.name, self.coco.imgs[id_]['file_name'])
+        else:
+            img_file = os.path.join(self.data_dir, self.name, '{:012}'.format(id_) + '.jpg')
         img = cv2.imread(img_file)
 
         if self.json_file == 'instances_val5k.json' and img is None:

@@ -14,7 +14,7 @@ class COCOAPIEvaluator():
     All the data in the val2017 dataset are processed \
     and evaluated by COCO API.
     """
-    def __init__(self, model_type, data_dir, img_size, confthre, nmsthre):
+    def __init__(self, model_type, data_dir, img_size, confthre, nmsthre, min_size, max_labels, use_filename_key):
         """
         Args:
             model_type (str): model name specified in config file
@@ -31,12 +31,17 @@ class COCOAPIEvaluator():
                                    data_dir=data_dir,
                                    img_size=img_size,
                                    json_file='instances_val2017.json',
-                                   name='val2017')
+                                   name='val2017',
+                                   min_size=min_size,
+                                   max_labels=max_labels,
+                                   use_filename_key=use_filename_key
+                                   )
         self.dataloader = torch.utils.data.DataLoader(
             self.dataset, batch_size=1, shuffle=False, num_workers=0)
         self.img_size = img_size
         self.confthre = 0.005 # from darknet
         self.nmsthre = nmsthre # 0.45 (darknet)
+        self.n_classes = len(self.dataset.class_ids)
 
     def evaluate(self, model):
         """
@@ -66,7 +71,7 @@ class COCOAPIEvaluator():
                 img = Variable(img.type(Tensor))
                 outputs = model(img)
                 outputs = postprocess(
-                    outputs, 80, self.confthre, self.nmsthre)
+                    outputs, self.n_classes, self.confthre, self.nmsthre)
                 if outputs[0] is None:
                     continue
                 outputs = outputs[0].cpu().data

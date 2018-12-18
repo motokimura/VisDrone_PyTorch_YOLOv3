@@ -46,8 +46,13 @@ def vis_bbox(img, bbox, label=None, score=None, label_names=None,
     # Returns newly instantiated matplotlib.axes.Axes object if ax is None
     if ax is None:
         fig = plt.figure()
-        ax = fig.add_subplot(1, 1, 1)
+        _, h, w = img.shape
+        w_ = w / 100.0
+        h_ = w_ * (h / w)
+        fig.set_size_inches((w_, h_))
+        ax = plt.axes([0, 0, 1, 1])
     ax.imshow(img.transpose((1, 2, 0)).astype(np.uint8))
+    ax.axis('off')
     # If there is no bounding box to display, visualize the image and exit.
     if len(bbox) == 0:
         return ax
@@ -81,6 +86,7 @@ def vis_bbox(img, bbox, label=None, score=None, label_names=None,
         if len(caption) > 0:
             ax.text(bb[1], bb[0],
                     ': '.join(caption),
+                    color='white',
                     style='italic',
-                    bbox={'facecolor': 'white', 'alpha': 0.7, 'pad': 10})
+                    bbox={'facecolor': color, 'edgecolor': color, 'alpha': 1, 'pad': 0})
     return ax
