@@ -11,8 +11,8 @@ Install dependencies by following:
 
 ```
 $ cd visdrone_scripts
-$ pip install pipenv
 
+$ pip install pipenv
 $ pipenv sync
 ```
 
