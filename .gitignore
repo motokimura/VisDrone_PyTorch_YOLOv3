@@ -1,0 +1,14 @@
+/COCO
+/VisDrone
+/checkpoints
+/logs
+/weights
+/det_results
+/visdrone_scripts/data
+output.png
+
+.python-version
+__pycache__
+.ipynb_checkpoints
+.DS_Store
+.vscode
