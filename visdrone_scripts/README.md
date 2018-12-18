@@ -18,7 +18,7 @@ $ pip install -r requirements.txt
 ### 1. Download VisDrone2018-DET dataset
 
 After downloading `VisDrone2018-DET-train.zip`, `VisDrone2018-DET-val.zip`, 
-and `VisDrone2018-VID-test-challenge.zip` from [VisDrone website](http://aiskyeye.com/views/index)., 
+and `VisDrone2018-VID-test-challenge.zip` from [VisDrone website](http://aiskyeye.com/views/index), 
 place them in `data` directory and unzip.
 
 ```
