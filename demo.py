@@ -45,7 +45,7 @@ def main():
         n_classes = 80
     if args.data == 'drone':
         cfg_path = 'config/yolov3_visdrone_default.cfg'
-        n_classes = 4
+        n_classes = 8
 
     with open(cfg_path, 'r') as f:
         cfg = yaml.load(f)
