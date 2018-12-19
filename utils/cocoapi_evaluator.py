@@ -55,7 +55,7 @@ class COCOAPIEvaluator():
             ap50 (float) : calculated COCO AP for IoU=50
         """
         model.eval()
-        device = model.get_device()
+        device = model.device()
         ids = []
         data_dict = []
         dataiterator = iter(self.dataloader)
