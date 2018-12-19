@@ -77,6 +77,8 @@ def postprocess(prediction, num_classes, conf_thre=0.7, nms_thre=0.45):
         output (list of torch tensor):
 
     """
+    device = prediction.get_device()
+
     box_corner = prediction.new(prediction.shape)
     box_corner[:, :, 0] = prediction[:, :, 0] - prediction[:, :, 2] / 2
     box_corner[:, :, 1] = prediction[:, :, 1] - prediction[:, :, 3] / 2
@@ -105,7 +107,7 @@ def postprocess(prediction, num_classes, conf_thre=0.7, nms_thre=0.45):
         # Iterate through all predicted classes
         unique_labels = detections[:, -1].cpu().unique()
         if prediction.is_cuda:
-            unique_labels = unique_labels.cuda()
+            unique_labels = unique_labels.to(device, dtype=torch.float32)
         for c in unique_labels:
             # Get the detections with the particular class
             detections_class = detections[detections[:, -1] == c]
