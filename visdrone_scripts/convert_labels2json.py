@@ -118,20 +118,20 @@ def convert_label2json(data_dir, categories_to_use, out_path):
 # In[5]:
 
 
-#categories_to_use = [
-#    'pedestrian', 'people', 'bicycle', 'car', 'van', 'truck', 'tricycle', 'awning-tricycle', 'bus', 'motor'
-#]
+categories_to_use = [
+    'pedestrian', 'people', 'bicycle', 'car', 'van', 'truck', 'tricycle', 'awning-tricycle', 'bus', 'motor'
+]
 
-#convert_label2json('data/VisDrone2018-DET-val', categories_to_use, 'val.json')
-#convert_label2json('data/VisDrone2018-DET-train', categories_to_use, 'train.json')
+convert_label2json('data/VisDrone2018-DET-val', categories_to_use, 'val.json')
+convert_label2json('data/VisDrone2018-DET-train', categories_to_use, 'train.json')
 
 
 # In[6]:
 
 
-categories_to_use = [
-    'bicycle', 'car', 'van', 'truck', 'tricycle', 'awning-tricycle', 'bus', 'motor'
-]
+#categories_to_use = [
+#    'bicycle', 'car', 'van', 'truck', 'tricycle', 'awning-tricycle', 'bus', 'motor'
+#]
 
-convert_label2json('data/VisDrone2018-DET-val', categories_to_use, 'val.json')
-convert_label2json('data/VisDrone2018-DET-train', categories_to_use, 'train.json')
+#convert_label2json('data/VisDrone2018-DET-val', categories_to_use, 'val.json')
+#convert_label2json('data/VisDrone2018-DET-train', categories_to_use, 'train.json')

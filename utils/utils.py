@@ -306,11 +306,11 @@ def get_coco_label_names():
 # [TBM] gen label_names from coco-format json file..
 def get_visdrone_label_names():
 
-    #label_names = ('background','pedestrian', 'people', 'bicycle', 'car', 'van', 'truck', 'tricycle', 'awning-tricycle', 'bus', 'motor')
-    #class_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    label_names = ('background','pedestrian', 'people', 'bicycle', 'car', 'van', 'truck', 'tricycle', 'awning-tricycle', 'bus', 'motor')
+    class_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-    label_names = ('background', 'bicycle', 'car', 'van', 'truck', 'tricycle', 'awning-tricycle', 'bus', 'motor')
-    class_ids = [1, 2, 3, 4, 5, 6, 7, 8]
+    #label_names = ('background', 'bicycle', 'car', 'van', 'truck', 'tricycle', 'awning-tricycle', 'bus', 'motor')
+    #class_ids = [1, 2, 3, 4, 5, 6, 7, 8]
 
     #label_names = ('background', 'car', 'van', 'truck', 'bus')
     #class_ids = [1, 2, 3, 4]
