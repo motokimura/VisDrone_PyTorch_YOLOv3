@@ -17,14 +17,14 @@ from utils.vis_bbox import vis_bbox
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--image', '-i', type=str)
-    parser.add_argument('--data', type=str, choices=['coco', 'drone'], default='drone')
-    parser.add_argument('--detect_thresh', type=float,
+    parser.add_argument('--data', '-d', type=str, choices=['coco', 'drone'], default='drone')
+    parser.add_argument('--detect_thresh', '-t', type=float,
                         default=0.5, help='confidence threshold')
-    parser.add_argument('--ckpt', type=str,
+    parser.add_argument('--ckpt', '-c', type=str,
                         help='path to the checkpoint file')
     parser.add_argument('--weights_path', '-w', type=str,
                         default=None, help='path to weights file')
-    parser.add_argument('--gpu', type=int, default=0)
+    parser.add_argument('--gpu', '-g', type=int, default=0)
     parser.add_argument('--window', action='store_true',
                         help='show result on matplotlib window. Otherwise, save as a PNG file')
     return parser.parse_args()
@@ -39,13 +39,18 @@ def main():
 
     assert args.data in ['coco', 'drone']
 
+    if torch.cuda.is_available() and args.gpu >= 0:
+        device = torch.device('cuda:{}'.format(args.gpu))
+    else:
+        device = torch.device('cpu')
+
     # [TBM] gen n_classes from coco-format json file..
     if args.data == 'coco':
         cfg_path = 'config/yolov3_default.cfg'
         n_classes = 80
     if args.data == 'drone':
         cfg_path = 'config/yolov3_visdrone_default.cfg'
-        n_classes = 8
+        n_classes = 10
 
     with open(cfg_path, 'r') as f:
         cfg = yaml.load(f)
@@ -64,12 +69,9 @@ def main():
     img_raw = img.copy()[:, :, ::-1].transpose((2, 0, 1))
     img, info_img = preprocess(img, imgsize)  # info = (h, w, nh, nw, dx, dy)
     img = torch.from_numpy(img).float().unsqueeze(0)
-
-    if args.gpu >= 0:
-        model.cuda(args.gpu)
-        img = Variable(img.type(torch.cuda.FloatTensor))
-    else:
-        img = Variable(img.type(torch.FloatTensor))
+    
+    model = model.to(device)
+    img = Variable(img.to(device, dtype=torch.float32))
 
     if args.weights_path:
         print("loading yolo weights %s" % (args.weights_path))

@@ -29,7 +29,7 @@ def parse_args():
     parser.add_argument('--checkpoint_dir', type=str,
                         default='checkpoints',
                         help='directory where checkpoint files are saved')
-    parser.add_argument('--use_cuda', type=bool, default=True)
+    parser.add_argument('--gpu', '-g', type=int, default=0)
     parser.add_argument('--debug', action='store_true', default=False,
                         help='debug mode where only one image is trained')
     parser.add_argument('--tboard', type=str, default='log_00', 
@@ -44,7 +44,11 @@ def main():
     args = parse_args()
     print("Setting Arguments.. : ", args)
 
-    cuda = torch.cuda.is_available() and args.use_cuda
+    if torch.cuda.is_available() and args.gpu >= 0:
+        device = torch.device('cuda:{}'.format(args.gpu))
+    else:
+        device = torch.device('cpu')
+
     os.makedirs(args.checkpoint_dir, exist_ok=True)
 
     # Use `file_name` key to load images when train YOLO with VisDrone data
@@ -120,9 +124,8 @@ def main():
         print("loading pytorch ckpt...", args.checkpoint)
         model.load_state_dict(torch.load(args.checkpoint))
 
-    if cuda:
-        print("using cuda") 
-        model = model.cuda()
+    print("sending model to device...")
+    model = model.to(device)
 
     if args.tboard:
         print("using tboard")
@@ -152,8 +155,6 @@ def main():
     # start training loop
     eval_interval = cfg['TRAIN']['ITER_EVAL']
     checkpoint_interval = cfg['TRAIN']['ITER_CKPT']
-    
-    dtype = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
     # random resizing..
     imgsize_max = imgsize
@@ -190,8 +191,8 @@ def main():
             except StopIteration:
                 dataiterator = iter(dataloader)
                 imgs, targets, _, _ = next(dataiterator)  # load a batch
-            imgs = Variable(imgs.type(dtype))
-            targets = Variable(targets.type(dtype), requires_grad=False)
+            imgs = Variable(imgs.to(device, dtype=torch.float32))
+            targets = Variable(targets.to(device, dtype=torch.float32), requires_grad=False)
             loss = model(imgs, targets)
             loss.backward()
 

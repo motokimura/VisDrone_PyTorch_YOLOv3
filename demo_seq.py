@@ -44,13 +44,18 @@ def main():
 
     assert args.data in ['coco', 'drone']
 
+    if torch.cuda.is_available() and args.gpu >= 0:
+        device = torch.device('cuda:{}'.format(args.gpu))
+    else:
+        device = torch.device('cpu')
+
     # [TBM] gen n_classes from coco-format json file..
     if args.data == 'coco':
         cfg_path = 'config/yolov3_default.cfg'
         n_classes = 80
     if args.data == 'drone':
         cfg_path = 'config/yolov3_visdrone_default.cfg'
-        n_classes = 8
+        n_classes = 10
 
     with open(cfg_path, 'r') as f:
         cfg = yaml.load(f)
@@ -63,8 +68,7 @@ def main():
     if args.detect_thresh:
         confthre = args.detect_thresh
 
-    if args.gpu >= 0:
-        model.cuda(args.gpu)
+    model = model.to(device)
 
     if args.weights_path:
         print("loading yolo weights %s" % (args.weights_path))
@@ -98,10 +102,7 @@ def main():
         img, info_img = preprocess(img, imgsize)  # info = (h, w, nh, nw, dx, dy)
         img = torch.from_numpy(img).float().unsqueeze(0)
 
-        if args.gpu >= 0:
-            img = Variable(img.type(torch.cuda.FloatTensor))
-        else:
-            img = Variable(img.type(torch.FloatTensor))
+        img = Variable(img.to(device, dtype=torch.float32))
 
         with torch.no_grad():
             outputs = model(img)

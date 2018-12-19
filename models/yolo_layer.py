@@ -68,7 +68,7 @@ class YOLOLayer(nn.Module):
         batchsize = output.shape[0]
         fsize = output.shape[2]
         n_ch = 5 + self.n_classes
-        dtype = torch.cuda.FloatTensor if xin.is_cuda else torch.FloatTensor
+        device = xin.get_device()
 
         output = output.view(batchsize, self.n_anchors, n_ch, fsize, fsize)
         output = output.permute(0, 1, 3, 4, 2)  # .contiguous()
@@ -79,17 +79,17 @@ class YOLOLayer(nn.Module):
 
         # calculate pred - xywh obj cls
 
-        x_shift = dtype(np.broadcast_to(
-            np.arange(fsize, dtype=np.float32), output.shape[:4]))
-        y_shift = dtype(np.broadcast_to(
-            np.arange(fsize, dtype=np.float32).reshape(fsize, 1), output.shape[:4]))
+        x_shift = torch.FloatTensor(np.broadcast_to(
+            np.arange(fsize, dtype=np.float32), output.shape[:4])).to(device, dtype=torch.float32)
+        y_shift = torch.FloatTensor(np.broadcast_to(
+            np.arange(fsize, dtype=np.float32).reshape(fsize, 1), output.shape[:4])).to(device, dtype=torch.float32)
 
         masked_anchors = np.array(self.masked_anchors)
 
-        w_anchors = dtype(np.broadcast_to(np.reshape(
-            masked_anchors[:, 0], (1, self.n_anchors, 1, 1)), output.shape[:4]))
-        h_anchors = dtype(np.broadcast_to(np.reshape(
-            masked_anchors[:, 1], (1, self.n_anchors, 1, 1)), output.shape[:4]))
+        w_anchors = torch.FloatTensor(np.broadcast_to(np.reshape(
+            masked_anchors[:, 0], (1, self.n_anchors, 1, 1)), output.shape[:4])).to(device, dtype=torch.float32)
+        h_anchors = torch.FloatTensor(np.broadcast_to(np.reshape(
+            masked_anchors[:, 1], (1, self.n_anchors, 1, 1)), output.shape[:4])).to(device, dtype=torch.float32)
 
         pred = output.clone()
         pred[..., 0] += x_shift
@@ -106,14 +106,14 @@ class YOLOLayer(nn.Module):
         # target assignment
 
         tgt_mask = torch.zeros(batchsize, self.n_anchors,
-                               fsize, fsize, 4 + self.n_classes).type(dtype)
+                               fsize, fsize, 4 + self.n_classes).to(device, dtype=torch.float32)
         obj_mask = torch.ones(batchsize, self.n_anchors,
-                              fsize, fsize).type(dtype)
+                              fsize, fsize).to(device, dtype=torch.float32)
         tgt_scale = torch.zeros(batchsize, self.n_anchors,
-                                fsize, fsize, 2).type(dtype)
+                                fsize, fsize, 2).to(device, dtype=torch.float32)
 
         target = torch.zeros(batchsize, self.n_anchors,
-                             fsize, fsize, n_ch).type(dtype)
+                             fsize, fsize, n_ch).to(device, dtype=torch.float32)
 
         labels = labels.cpu().data
         nlabel = (labels.sum(dim=2) > 0).sum(dim=1)  # number of objects
