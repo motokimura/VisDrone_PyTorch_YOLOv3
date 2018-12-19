@@ -12,6 +12,7 @@ tqdm = "*"
 scikit-image = "*"
 matplotlib = "*"
 seaborn = "*"
+jupyter = "*"
 
 [requires]
 python_version = "3.5"
