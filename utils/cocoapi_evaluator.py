@@ -1,6 +1,7 @@
 import json
 import tempfile
 
+import torch
 from pycocotools.cocoeval import COCOeval
 from torch.autograd import Variable
 
@@ -54,8 +55,7 @@ class COCOAPIEvaluator():
             ap50 (float) : calculated COCO AP for IoU=50
         """
         model.eval()
-        cuda = torch.cuda.is_available()
-        Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
+        device = model.get_device()
         ids = []
         data_dict = []
         dataiterator = iter(self.dataloader)
@@ -68,7 +68,7 @@ class COCOAPIEvaluator():
             id_ = int(id_)
             ids.append(id_)
             with torch.no_grad():
-                img = Variable(img.type(Tensor))
+                img = Variable(img.to(device, dtype=torch.float32))
                 outputs = model(img)
                 outputs = postprocess(
                     outputs, self.n_classes, self.confthre, self.nmsthre)
