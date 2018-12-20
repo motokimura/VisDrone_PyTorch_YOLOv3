@@ -21,7 +21,7 @@ def parse_args():
                         help='VisDrone sequence images')
     parser.add_argument('--out_dir', '-o', type=str, default='det_results',
                         help='Output directory')
-    parser.add_argument('--step', '-s', type=int, default=10, 
+    parser.add_argument('--step', '-s', type=int, default=1, 
                         help='Step to sample input images')
     parser.add_argument('--data', '-d', type=str, choices=['coco', 'drone'], default='drone')
     parser.add_argument('--detect_thresh', '-t', type=float, default=0.5, 
